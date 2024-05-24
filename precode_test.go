@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -14,8 +15,12 @@ import (
 func TestHandleCafeListWhenDataCorrect(t *testing.T) {
 	// Данные для запроса
 	city := "moscow"
-	count := 2
-	reqURL := fmt.Sprintf("/cafe?count=%d&city=%s", count, city)
+	count := "2"
+	baseURL := "/cafe"
+	params := url.Values{}
+	params.Add("count", count)
+	params.Add("city", city)
+	reqURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 	req := httptest.NewRequest("GET", reqURL, nil)
 
@@ -36,8 +41,12 @@ func TestHandleCafeListWhenDataCorrect(t *testing.T) {
 func TestHandleCafeListWhenCityIsWrong(t *testing.T) {
 	// Данные для запроса
 	city := "dubai"
-	count := 1
-	reqURL := fmt.Sprintf("/cafe?count=%d&city=%s", count, city)
+	count := "1"
+	baseURL := "/cafe"
+	params := url.Values{}
+	params.Add("count", count)
+	params.Add("city", city)
+	reqURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 	req := httptest.NewRequest("GET", reqURL, nil)
 
@@ -46,9 +55,6 @@ func TestHandleCafeListWhenCityIsWrong(t *testing.T) {
 	handler := http.HandlerFunc(handleCafeList)
 	handler.ServeHTTP(responseRecorder, req)
 
-	// Проверка наличия ошибки
-	var err error
-	require.NoError(t, err)
 	// Проверка наличия 400 ошибки
 	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code)
 	// Проверка тела ответа
@@ -59,8 +65,12 @@ func TestHandleCafeListWhenCityIsWrong(t *testing.T) {
 func TestHandleCafeListWhenCountMoreThanTotal(t *testing.T) {
 	// Данные для запроса
 	city := "moscow"
-	count := 100000
-	reqURL := fmt.Sprintf("/cafe?count=%d&city=%s", count, city)
+	count := "100000"
+	baseURL := "/cafe"
+	params := url.Values{}
+	params.Add("count", count)
+	params.Add("city", city)
+	reqURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 	req := httptest.NewRequest("GET", reqURL, nil)
 
@@ -69,9 +79,6 @@ func TestHandleCafeListWhenCountMoreThanTotal(t *testing.T) {
 	handler := http.HandlerFunc(handleCafeList)
 	handler.ServeHTTP(responseRecorder, req)
 
-	// Проверка наличия ошибки
-	var err error
-	require.NoError(t, err)
 	// Проверка на пусте тело ответа
 	require.NotEmpty(t, responseRecorder.Body)
 	// Проверка на ожидаемую длину ответа
